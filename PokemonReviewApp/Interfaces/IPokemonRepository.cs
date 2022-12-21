@@ -6,5 +6,10 @@ namespace PokemonReviewApp.Interfaces
     {
         //this function provide for the client utilize
         ICollection<Pokemon> GetPokemons(); //return a pokemon list
+        Pokemon GetPokemon(int id);
+        Pokemon GetPokemon(string name);
+        decimal GetPokemonRating(int pokeId);
+        bool PokemonExists(int pokeId);
+
     }
 }

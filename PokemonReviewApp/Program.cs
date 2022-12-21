@@ -10,7 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Add auto mapper
 builder.Services.AddScoped<IPokemonRepository, PokemonRepository>(); //call my interface and repository in the scoped
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); //call my interface and repository in the scoped
+builder.Services.AddScoped<ICountryRepository, CountryRepository>(); //call my interface and repository in the scoped
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
