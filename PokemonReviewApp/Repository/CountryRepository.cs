@@ -18,6 +18,12 @@ namespace PokemonReviewApp.Repository
             return _context.Countries.Any(c => c.Id == countryId);
         }
 
+        public bool CreateCountry(Country country)
+        {
+            _context.Countries.Add(country);
+            return Save();
+        }
+
         public ICollection<Country> GetCountries()
         {
             return _context.Countries.OrderBy(c => c.Id).ToList();
@@ -39,6 +45,12 @@ namespace PokemonReviewApp.Repository
         {
                             //enter in table n and compare with id and list
             return _context.Owners.Where(o => o.Country.Id == countryId).ToList(); //get 1-n
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved  >  0 ? true : false;
         }
     }
 }
