@@ -54,6 +54,42 @@ namespace PokemonReviewApp.Controllers
             return Ok(reviews);
         }
 
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReviewer([FromBody] ReviewerDto newReviewer)
+        {
+            if(newReviewer == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var reviewerExist = _reviewerRepository.GetReviewers()
+                .Where(r => r.LastName.Trim().ToUpper() == newReviewer.LastName.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if (reviewerExist != null)
+            {
+                ModelState.AddModelError("", "Reviewer exist!");
+                return StatusCode(402, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return NotFound(ModelState);
+
+            var reviewerMap = _mapper.Map<Reviewer>(newReviewer);
+
+            var sucess = _reviewerRepository.CreateReviewer(reviewerMap);
+
+            if (!sucess)
+            {
+                ModelState.AddModelError("", "Error!");
+                return StatusCode(402, ModelState);
+            }
+
+            return Ok("Reviewer created!");
+
+        }
 
     }
 }

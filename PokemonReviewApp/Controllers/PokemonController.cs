@@ -70,5 +70,39 @@ namespace PokemonReviewApp.Controllers
             return Ok(rating);
         }
 
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult CreatePokemon([FromQuery] int ownerId, [FromQuery] int categoryId, [FromBody] PokemonDto pokemonCreated)
+        {
+            if(pokemonCreated == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var pokemonExist = _pokemonRepository.GetPokemons()
+                .Where(p => p.Name.ToUpper().Trim() == pokemonCreated.Name.ToUpper().TrimEnd())
+                .FirstOrDefault();
+
+            if(pokemonExist != null)
+            {
+                ModelState.AddModelError("", "Pokemon exist!");
+                return StatusCode(400, ModelState);
+            }
+
+            if(!ModelState.IsValid) return BadRequest();
+
+            var pokemonMap = _mapper.Map<Pokemon>(pokemonCreated);
+
+            var sucess = _pokemonRepository.CreatePokemon(ownerId, categoryId, pokemonMap);
+
+            if (!sucess)
+            {
+                ModelState.AddModelError("", "Something went wrong while savin");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created");
+        }
+
     }
 }
