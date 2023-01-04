@@ -4,6 +4,7 @@ using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
+using PokemonReviewApp.Repository;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -14,8 +15,9 @@ namespace PokemonReviewApp.Controllers
         //controller get the data with geting in the repository and show the public
 
         private readonly IPokemonRepository _pokemonRepository; //call my interface
+        private readonly IOwnerRepository _ownerRepository;
         private readonly IMapper _mapper;
-
+        
         //istance my controller
         public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper)
         {
@@ -104,5 +106,36 @@ namespace PokemonReviewApp.Controllers
             return Ok("Successfully created");
         }
 
+        [HttpPut("{pokeId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdatePokemon(int pokeId, [FromQuery] int ownerId, [FromQuery] int categoryId, [FromBody] PokemonDto updatePokemon)
+        {
+            if (updatePokemon == null)
+                return BadRequest();
+
+            if (pokeId != updatePokemon.Id)
+                return BadRequest(ModelState);
+
+            if (!_pokemonRepository.PokemonExists(pokeId))
+                return BadRequest();
+
+            if (!ModelState.IsValid)
+                return NotFound();
+
+            var pokemonMap = _mapper.Map<Pokemon>(updatePokemon);
+
+            
+            var sucess = _pokemonRepository.UpdatePokemon(ownerId, categoryId, pokemonMap);
+
+            if (!sucess)
+            {
+                ModelState.AddModelError("", "Error in updatee.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Owner update");
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -41,7 +42,7 @@ namespace PokemonReviewApp.Controllers
            return Ok(country);
         }
 
-        [HttpGet("/owners/{ownerId}")]
+        [HttpGet("/{ownerId}/country")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Country>))]
         [ProducesResponseType(400)]
         public IActionResult GetCountryByOwner(int ownerId)
@@ -92,6 +93,34 @@ namespace PokemonReviewApp.Controllers
             return Ok("Sucess Created");
         }
 
+        [HttpPut("{countryId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCountry(int countryId, [FromBody] CountryDto updateCountry)
+        {
+            if (updateCountry == null) 
+                return BadRequest();
 
+            if(countryId != updateCountry.Id) 
+                return BadRequest();
+
+            if(!_countryRepository.CountryExists(countryId)) 
+                return NotFound();
+
+            if(!ModelState.IsValid) 
+                return BadRequest();
+
+            var coutryMap = _mapper.Map<Country>(updateCountry);
+
+            var sucess = _countryRepository.UpdateCountry(coutryMap);
+
+            if (!sucess)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok("Coutry Update!");
+        }
     }
 }

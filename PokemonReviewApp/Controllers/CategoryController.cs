@@ -96,5 +96,35 @@ namespace PokemonReviewApp.Controllers
             return Ok("Seucessfully created");
         }
 
+        [HttpPut("{categoryId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto updateCategory)
+        {
+            if (updateCategory == null)
+                return BadRequest(ModelState);
+
+            if(categoryId != updateCategory.Id)
+                return BadRequest(ModelState);
+
+            if(!_categoryRepository.CategoryExist(categoryId))
+                return NotFound();
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var categoryMap = _mapper.Map<Category>(updateCategory);
+
+            var sucess = _categoryRepository.UpdateCategory(categoryMap);
+
+            if (!sucess)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok("Category Update");
+        }
+
     }
 }
