@@ -16,13 +16,15 @@ namespace PokemonReviewApp.Controllers
 
         private readonly IPokemonRepository _pokemonRepository; //call my interface
         private readonly IOwnerRepository _ownerRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         
         //istance my controller
-        public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper)
+        public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper, IReviewRepository reviewRepository)
         {
             _pokemonRepository = pokemonRepository;
             _mapper = mapper;
+            _reviewRepository= reviewRepository;
         }
 
 
@@ -136,6 +138,35 @@ namespace PokemonReviewApp.Controllers
             }
 
             return Ok("Owner update");
+        }
+        [HttpDelete("{pokeId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeletePokemon(int pokeId)
+        {
+            if(!_pokemonRepository.PokemonExists(pokeId))
+                return NotFound();
+
+            var reviewsToDelete = _reviewRepository.GetReviewsOfAPokemon(pokeId);
+
+            //check reviews of pokemon
+            var pokemonToDelete = _pokemonRepository.GetPokemon(pokeId);
+
+            //delete all reviews of pokemon
+            if (!_reviewRepository.DeleteReviews(reviewsToDelete.ToList()))
+            {
+                ModelState.AddModelError("", "Something went wrong when deleting reviews");
+                return StatusCode(500, ModelState);
+            }
+
+            if (!_pokemonRepository.DeletePokemon(pokemonToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong when deleting pokemon");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Pokemon deleted!");
         }
     }
 }

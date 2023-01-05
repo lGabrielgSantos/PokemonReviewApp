@@ -122,5 +122,34 @@ namespace PokemonReviewApp.Controllers
 
             return Ok("Coutry Update!");
         }
+
+        [HttpDelete("{coutryId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteCoutry(int coutryId)
+        {
+            if(coutryId == null) 
+                return BadRequest();
+
+            if (!_countryRepository.CountryExists(coutryId))
+                return NotFound(ModelState);
+
+
+            var coutryDelete = _countryRepository.GetCountry(coutryId);
+
+            if (!ModelState.IsValid)
+                return NotFound(ModelState);
+
+            var sucess = _countryRepository.DeleteCountry(coutryDelete);
+
+            if(!sucess)
+            {
+                ModelState.AddModelError("", "Error in delete coutry");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Coutry Deleted!");
+
+        }
     }
 }

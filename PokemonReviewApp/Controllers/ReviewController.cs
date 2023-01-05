@@ -102,7 +102,7 @@ namespace PokemonReviewApp.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateOwner(int reviewId, [FromBody] ReviewDto updateReview)
+        public IActionResult UpdateReview(int reviewId, [FromBody] ReviewDto updateReview)
         {
             if (updateReview == null)
                 return BadRequest();
@@ -129,6 +129,33 @@ namespace PokemonReviewApp.Controllers
             return Ok("Review update");
         }
 
+        [HttpDelete("{reviewId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteReview(int reviewId)
+        {
+            if(reviewId == null)
+                return BadRequest();
+
+            if (!_reviewRepository.ReviewExists(reviewId))
+                return BadRequest();
+
+            var reviewDelete = _reviewRepository.GetReview(reviewId);
+
+            if (!ModelState.IsValid)
+                return NotFound();
+
+            var sucess = _reviewRepository.DeleteReview(reviewDelete);
+
+            if(!sucess)
+            {
+                ModelState.AddModelError("", "Error in deleted.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Review deleted.");
+        }
 
     }
 }
